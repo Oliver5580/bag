@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0c0f1e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<title>浮生仙途 · 人生模拟器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<!-- ============ 开始界面 ============ -->
+<section id="scr-start" class="screen">
+  <div class="start-wrap">
+    <h1 class="game-title serif">浮生仙途</h1>
+    <p class="game-sub">人 生 模 拟 器 · 修 仙 篇</p>
+    <div class="start-card">
+      <div class="start-preview">
+        <div id="preview-portrait"></div>
+        <div class="lead-note" id="lead-note"></div>
+      </div>
+      <div class="start-form">
+        <div class="f-row">
+          <span class="f-label serif">姓名</span>
+          <input type="text" id="in-name" maxlength="8" placeholder="给自己起个道号吧">
+          <button class="btn small" id="btn-randname">换名</button>
+        </div>
+        <div class="f-row">
+          <span class="f-label serif">性别</span>
+          <div class="seg" id="seg-gender">
+            <button class="btn on" data-g="m">男</button>
+            <button class="btn" data-g="f">女</button>
+          </div>
+        </div>
+        <div class="f-row">
+          <span class="f-label serif">出身</span>
+          <select id="in-origin">
+            <option value="rand">🎲 随机天命 · 不耗点，全凭气运</option>
+            <option value="shijia">修仙世家 · 家传功法，灵石充裕（耗 12 点）</option>
+            <option value="tong">凡人富户 · 衣食无忧，父母安康（耗 5 点）</option>
+            <option value="pin">山村贫户 · 家徒四壁，百炼成钢（免费）</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <span class="f-label serif">天赋</span>
+          <select id="in-talent">
+            <option value="rand">🎲 随机天命 · 不耗点，全凭气运</option>
+            <option value="daoti">天生道体 · 悟性超凡（学霸，耗 10 点）</option>
+            <option value="tiruo">先天体弱 · 多病但心志坚定（免费）</option>
+            <option value="lingxi">八面玲珑 · 天生交际圣体（耗 6 点）</option>
+            <option value="jianxin">剑心通明 · 剑骨天成，体魄过人（耗 6 点）</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <span class="f-label serif">先天的赋</span>
+          <div class="alloc-box">
+            <div class="build-row" id="build-row">
+              <button class="btn build-btn on" data-b="jian">🗡️ 剑修</button>
+              <button class="btn build-btn" data-b="shu">📖 书修</button>
+              <button class="btn build-btn" data-b="qing">🌸 情修</button>
+              <button class="btn build-btn" data-b="jun">☯️ 均衡</button>
+              <button class="btn build-btn" data-b="rand">🎲 天命随机</button>
+            </div>
+            <div class="stat-preview serif" id="stat-preview"></div>
+            <div class="alloc-head" id="build-hint">选一个流派即可 —— 出身与天赋占用资质点，剩余点数自动按流派分配（单项上限：精力+12 悟性+18 魅力+18 灵性+15）</div>
+          </div>
+        </div>
+        <div class="desc-line" id="desc-line">出身与天赋将大幅影响事件概率：修仙世家更易遇机缘，先天体弱者更易生病，八面玲珑者更易结缘……</div>
+        <div class="start-btns">
+          <button class="btn" id="btn-randall">🎲 随机一生</button>
+          <button class="btn primary serif" id="btn-start">踏 入 仙 途</button>
+          <button class="btn ghost" id="btn-continue">续前世 · 读档</button>
+        </div>
+      </div>
+    </div>
+    <div class="howto">
+      <b>玩法</b>：每回合为一年 —— 选择一件<b>生活行为</b>（修炼 / 学习 / 打工 / 运动 / 社交 / 休息 / 挥霍），随后时光流逝，<b>随机事件</b>与<b>抉择事件</b>会改写你的命运。<br>
+      六岁灵根觉醒，十八岁执棋择路；修为圆满可突破境界延寿，善恶心念影响机缘与心魔。与旅途中<b>邂逅的有缘人</b>结为道侣，双修共进，亦可开枝散叶。<br>
+      境界：凡人 → 炼气 → 筑基 → 金丹 → 元婴 → 化神 → 渡劫 → 大乘 → <b>飞升</b>。气血归零、寿元耗尽或负债累累，皆是一世之终。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 游戏界面 ============ -->
+<section id="scr-game" class="screen hidden">
+  <header>
+    <div class="hd-title serif">浮生仙途</div>
+    <div class="hd-age" id="hd-age"></div>
+    <button class="btn small" id="btn-music">🔊 配乐</button>
+    <input type="range" id="music-vol" min="0" max="100" value="32" title="配乐音量" aria-label="配乐音量">
+    <button class="btn small" id="btn-fs">⛶ 全屏</button>
+    <button class="btn small" id="btn-fast">⏳ 岁月如梭·五载</button>
+    <button class="btn small" id="btn-restart">重开一世</button>
+  </header>
+  <main>
+    <aside id="panel"></aside>
+    <div id="stage">
+      <div id="log"></div>
+      <div id="event-card" class="hidden">
+        <div class="ev-img" id="ev-img"></div>
+        <div class="ev-body">
+          <div class="ev-cat" id="ev-cat"></div>
+          <div class="ev-title serif" id="ev-title"></div>
+          <div class="ev-text" id="ev-text"></div>
+          <div class="ev-choices" id="ev-choices"></div>
+          <div class="ev-out hidden" id="ev-out"></div>
+          <div class="ev-continue hidden" id="ev-continue"></div>
+        </div>
+      </div>
+      <div id="actions"></div>
+    </div>
+  </main>
+</section>
+
+<!-- ============ 结局界面 ============ -->
+<section id="scr-end" class="screen hidden">
+  <div class="end-wrap">
+    <div class="end-title-sm serif">一 世 之 终 · 人 生 报 告</div>
+    <div class="end-title serif" id="end-title"></div>
+    <div class="end-score" id="end-score"></div>
+    <div class="end-card">
+      <div class="end-portrait" id="end-portrait"></div>
+      <div class="end-info">
+        <div class="poem" id="end-poem"></div>
+        <div class="end-stats" id="end-stats"></div>
+        <div class="end-ms" id="end-ms"></div>
+      </div>
+    </div>
+    <div class="end-btns">
+      <button class="btn primary serif" id="btn-again">再 入 轮 回</button>
+      <button class="btn" id="btn-lookback">回望此生</button>
+    </div>
+  </div>
+</section>
+
+<div id="banner" class="hidden"></div>
+<script src="game.js" defer></script>
+</body>
+</html>

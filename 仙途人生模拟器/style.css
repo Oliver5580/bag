@@ -1,0 +1,622 @@
+/* ============ 浮生仙途 · 人生模拟器 ============ */
+:root{
+  --bg0:#06070d; --bg1:#0c0f1e;
+  --ink:#e9e2cf; --ink-dim:#a49db1;
+  --gold:#d8b45a; --gold2:#f6dd94;
+  --jade:#57d3ae; --purple:#9a86e8; --red:#e26a6f; --blue:#6fb3e8; --pink:#ef8fb0;
+  --panel:rgba(15,19,36,.80); --panel2:rgba(22,27,50,.62);
+  --line:rgba(216,180,90,.34);
+  --good:#7fe0a8; --bad:#ff8f8f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 720px at 75% -10%, rgba(96,64,180,.26), transparent 62%),
+    radial-gradient(900px 620px at 6% 108%, rgba(38,140,120,.15), transparent 62%),
+    linear-gradient(180deg,var(--bg0),var(--bg1));
+  overflow:hidden;
+}
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.serif{font-family:"STKaiti","KaiTi","Noto Serif SC","SimSun",serif}
+.screen{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:9px}
+::-webkit-scrollbar-thumb{background:rgba(216,180,90,.28);border-radius:5px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+
+/* ============ 通用按钮 ============ */
+.btn{
+  font-family:inherit;cursor:pointer;color:var(--ink);
+  background:linear-gradient(180deg,rgba(52,44,26,.55),rgba(28,24,14,.55));
+  border:1px solid var(--line);border-radius:10px;
+  padding:9px 18px;font-size:14px;letter-spacing:2px;
+  transition:all .18s ease;position:relative;
+}
+.btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);box-shadow:0 0 14px rgba(216,180,90,.25);transform:translateY(-1px)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn.primary{
+  background:linear-gradient(180deg,rgba(120,90,30,.6),rgba(70,50,16,.7));
+  border-color:var(--gold);color:var(--gold2);font-size:16px;padding:12px 26px;
+}
+.btn.primary:hover{box-shadow:0 0 22px rgba(216,180,90,.45)}
+.btn.ghost{background:transparent}
+.btn.small{padding:5px 10px;font-size:12px;letter-spacing:1px;border-radius:7px}
+
+/* ============ 开始界面 ============ */
+#scr-start{align-items:center;justify-content:center;overflow:auto;padding:26px 14px}
+.start-wrap{text-align:center;max-width:960px;width:100%}
+.game-title{
+  font-family:"STKaiti","KaiTi","Noto Serif SC",serif;
+  font-size:56px;letter-spacing:16px;color:var(--gold2);font-weight:700;
+  text-shadow:0 0 26px rgba(216,180,90,.55),0 2px 0 #5a4210;
+  animation:titleGlow 3.4s ease-in-out infinite;
+}
+@keyframes titleGlow{0%,100%{text-shadow:0 0 18px rgba(216,180,90,.4),0 2px 0 #5a4210}50%{text-shadow:0 0 34px rgba(246,221,148,.75),0 2px 0 #5a4210}}
+.game-sub{margin:10px 0 24px;color:var(--ink-dim);letter-spacing:6px;font-size:15px}
+.start-card{
+  display:grid;grid-template-columns:280px 1fr;gap:0;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 18px 60px rgba(0,0,0,.55), inset 0 0 60px rgba(216,180,90,.05);
+  overflow:hidden;
+}
+.start-preview{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:18px 12px;border-right:1px solid var(--line);
+  background:radial-gradient(280px 320px at 50% 30%, rgba(120,90,180,.22), transparent 70%);
+}
+.start-preview svg,.start-preview .pframe{width:210px;height:280px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5))}
+.lead-note{margin-top:10px;font-size:12.5px;color:var(--ink-dim);letter-spacing:1px;text-align:center;line-height:1.7}
+.lead-note b{color:var(--pink)}
+.reroll-lead{display:block;margin:8px auto 0}
+.alloc-box{flex:1;min-width:230px;display:flex;flex-direction:column;gap:7px}
+.alloc-head{font-size:12px;color:var(--gold);letter-spacing:.5px}
+.alloc-head b{color:#ffe9b8;font-size:14px}
+.build-row{display:flex;gap:8px;flex-wrap:wrap}
+.build-btn{padding:7px 13px;font-size:13px;letter-spacing:1px;border-radius:9px}
+.build-btn.on{
+  border-color:var(--gold);color:var(--gold2);
+  background:linear-gradient(180deg,rgba(120,90,30,.5),rgba(70,50,16,.6));
+  box-shadow:0 0 12px rgba(216,180,90,.3);
+}
+.stat-preview{margin-top:2px;font-size:13.5px;color:var(--ink-dim);letter-spacing:1px}
+.stat-preview b{color:#ffe9b8;font-size:15px;margin:0 1px;font-variant-numeric:tabular-nums}
+.stat-preview .b-tip{display:block;margin-top:2px;font-size:11.5px;color:var(--ink-dim);opacity:.75;letter-spacing:.5px}
+.start-form{padding:22px 26px;display:flex;flex-direction:column;gap:13px}
+.f-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.f-label{font-size:13px;color:var(--gold);letter-spacing:3px;min-width:58px}
+input[type=text],select{
+  font-family:inherit;background:rgba(8,10,22,.8);color:var(--ink);
+  border:1px solid rgba(216,180,90,.3);border-radius:8px;padding:8px 12px;font-size:14px;outline:none;
+  transition:border .15s;
+}
+input[type=text]{flex:1;min-width:120px}
+input[type=text]:focus,select:focus{border-color:var(--gold)}
+select{cursor:pointer}
+select option{background:#101426}
+.seg{display:flex;gap:8px}
+.seg .btn{padding:8px 22px}
+.seg .btn.on{border-color:var(--gold);color:var(--gold2);background:linear-gradient(180deg,rgba(120,90,30,.5),rgba(70,50,16,.6));box-shadow:0 0 12px rgba(216,180,90,.3)}
+.desc-line{font-size:12.5px;color:var(--ink-dim);line-height:1.75;min-height:44px;border-left:2px solid var(--line);padding-left:10px}
+.start-btns{display:flex;gap:12px;margin-top:4px;flex-wrap:wrap}
+.howto{margin-top:22px;font-size:12.5px;color:var(--ink-dim);line-height:2;letter-spacing:.5px}
+.howto b{color:var(--gold)}
+
+/* ============ 游戏主界面 ============ */
+#scr-game header{
+  display:flex;align-items:center;gap:16px;padding:10px 20px;
+  background:linear-gradient(180deg,rgba(10,12,24,.92),rgba(10,12,24,.55));
+  border-bottom:1px solid var(--line);backdrop-filter:blur(6px);z-index:5;
+}
+.hd-title{font-family:"STKaiti","KaiTi",serif;font-size:22px;letter-spacing:8px;color:var(--gold2)}
+.hd-age{flex:1;font-size:14px;color:var(--ink-dim);letter-spacing:2px}
+/* 配乐开关与音量 */
+#music-vol{
+  -webkit-appearance:none;appearance:none;width:78px;height:6px;border-radius:4px;
+  background:linear-gradient(90deg,var(--gold),rgba(216,180,90,.25));
+  outline:none;cursor:pointer;flex-shrink:0;
+}
+#music-vol::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--gold2);border:1px solid #7a5c1c;box-shadow:0 0 8px rgba(246,221,148,.6);cursor:pointer;
+}
+#music-vol::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;background:var(--gold2);
+  border:1px solid #7a5c1c;box-shadow:0 0 8px rgba(246,221,148,.6);cursor:pointer;
+}
+.btn.small.on{border-color:var(--gold);color:var(--gold2);background:linear-gradient(180deg,rgba(120,90,30,.5),rgba(70,50,16,.6))}
+.hd-age b{color:var(--gold2);font-size:17px}
+#scr-game main{flex:1;display:grid;grid-template-columns:300px 1fr;gap:14px;padding:14px;min-height:0}
+
+/* ---- 左侧角色面板 ---- */
+#panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:14px 14px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;
+  box-shadow:inset 0 0 40px rgba(216,180,90,.04);
+}
+#portrait-box{border-radius:14px;overflow:hidden;border:1px solid rgba(216,180,90,.22);background:radial-gradient(240px 280px at 50% 28%,rgba(120,90,180,.25),rgba(10,12,24,.4))}
+#portrait-box svg{display:block;width:100%;height:auto}
+#portrait-box .pframe{display:block;width:100%;height:auto}
+.p-child svg{transform:scale(.86);transform-origin:50% 30%}
+.p-old svg{filter:sepia(.32) saturate(.72) brightness(.94)}
+.p-child .pframe img{transform:scale(.86);transform-origin:50% 30%}
+.p-old .pframe img{filter:var(--look,saturate(1)) sepia(.32) saturate(.72) brightness(.94)}
+
+/* ===== 立绘改用 <img> 容器 ===== */
+.pframe{
+  position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;
+  background:radial-gradient(240px 280px at 50% 28%,rgba(120,90,180,.25),rgba(10,12,24,.4));
+  border:1px solid rgba(216,180,90,.22);box-shadow:0 8px 24px rgba(0,0,0,.5);
+  aspect-ratio:3/4;
+}
+.pframe img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;display:block;z-index:1;border-radius:13px;
+  filter:var(--look,none);
+}
+.pframe img.bad{display:none}
+/* 男主立绘：烘焙变体已裁掉白底，仅保留轻微取景缩放；同时带呼吸待机 */
+.pframe.m img{transform-origin:50% 100%;animation:pBreathM 5.4s ease-in-out infinite alternate}
+@keyframes pBreathM{from{transform:scale(1.05)}to{transform:scale(1.065) translateY(-2px)}}
+.p-child .pframe.m img{animation-name:pBreathMC}
+@keyframes pBreathMC{from{transform:scale(1)}to{transform:scale(1.012) translateY(-2px)}}
+/* 女主/道侣头像呼吸待机 */
+.pframe:not(.m) img{animation:pBreath 5.4s ease-in-out infinite alternate;transform-origin:50% 88%}
+@keyframes pBreath{from{transform:scale(1)}to{transform:scale(1.014) translateY(-2px)}}
+.p-child .pframe:not(.m) img{animation-name:pBreathC}
+@keyframes pBreathC{from{transform:scale(.86)}to{transform:scale(.874) translateY(-2px)}}
+.pframe-glow{animation:pGlow 5.4s ease-in-out infinite alternate}
+@keyframes pGlow{from{opacity:.4}to{opacity:.62}}
+.pframe-glow{
+  content:'';position:absolute;inset:-20%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 36%,var(--aura,#d8b45a) 0%,transparent 55%);
+  opacity:.55;
+}
+.pframe-vig{
+  position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:13px;
+  background:radial-gradient(circle at 50% 40%,transparent 50%,var(--aura,#d8b45a) 100%);
+  opacity:.45;
+}
+.pframe.halo{box-shadow:0 0 44px rgba(246,221,148,.55)}
+.pframe.halo.dark{box-shadow:0 0 34px rgba(90,100,130,.35)}
+.ch-name{display:flex;align-items:baseline;gap:10px;justify-content:center;margin-top:2px}
+.ch-name b{font-family:"STKaiti","KaiTi",serif;font-size:21px;letter-spacing:4px;color:var(--gold2)}
+.ch-name span{font-size:12px;color:var(--ink-dim)}
+.tag-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.tag{font-size:11px;letter-spacing:1px;padding:2.5px 9px;border-radius:99px;border:1px solid var(--line);color:var(--gold);background:rgba(216,180,90,.08)}
+.tag.jade{color:var(--jade);border-color:rgba(87,211,174,.4);background:rgba(87,211,174,.08)}
+.tag.purple{color:var(--purple);border-color:rgba(154,134,232,.4);background:rgba(154,134,232,.08)}
+.realm-badge{
+  text-align:center;font-family:"STKaiti","KaiTi",serif;font-size:18px;letter-spacing:5px;
+  padding:7px 0;border-radius:10px;border:1px solid var(--line);color:var(--gold2);
+  background:linear-gradient(180deg,rgba(120,90,30,.28),rgba(40,30,10,.28));
+  text-shadow:0 0 12px rgba(216,180,90,.5);
+}
+.cult-row{font-size:12px;color:var(--ink-dim);display:flex;justify-content:space-between;letter-spacing:1px}
+.bar{height:9px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.bar>i{display:block;height:100%;border-radius:6px;transition:width .5s ease;background:var(--c,linear-gradient(90deg,#d8b45a,#f6dd94))}
+.stat-row{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.stat-row .lb{width:64px;color:var(--ink-dim);letter-spacing:1px;white-space:nowrap;flex-shrink:0;cursor:help}
+.stat-row .vl{width:52px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat-row .bar{flex:1}
+.drain-warn{
+  font-size:12px;line-height:1.75;color:#ffcaa8;letter-spacing:.4px;
+  background:rgba(226,106,111,.12);border:1px solid rgba(226,106,111,.42);
+  border-radius:9px;padding:6px 9px;animation:drainPulse 2.4s ease-in-out infinite;
+}
+.drain-warn b{color:#ff9a9a;font-weight:700}
+@keyframes drainPulse{0%,100%{box-shadow:0 0 0 rgba(226,106,111,0)}50%{box-shadow:0 0 14px rgba(226,106,111,.3)}}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:12.5px}
+.mini-grid .k{color:var(--ink-dim);letter-spacing:1px;white-space:nowrap;cursor:help}
+.mini-grid .v{text-align:right;font-variant-numeric:tabular-nums}
+.mini-grid .v.neg{color:var(--bad)}
+.karma-wrap{font-size:12px;color:var(--ink-dim)}
+.karma-bar{position:relative;height:9px;border-radius:6px;margin-top:5px;background:linear-gradient(90deg,#5a3ae0,#2a2a3a 50%,#c05a4a);border:1px solid rgba(255,255,255,.08)}
+.karma-bar>i{position:absolute;top:-3.5px;width:5px;height:16px;border-radius:3px;background:var(--gold2);box-shadow:0 0 8px rgba(246,221,148,.8);transition:left .5s}
+.rel-box{border-top:1px dashed rgba(216,180,90,.25);padding-top:8px;display:flex;flex-direction:column;gap:5px;font-size:12.5px}
+.rel-box .rt{color:var(--gold);letter-spacing:3px;font-size:12px;margin-bottom:2px}
+.rel-line{display:flex;justify-content:space-between;color:var(--ink-dim)}
+.rel-line b{color:var(--ink);font-weight:400}
+.rel-line .dead{color:#7a7488}
+
+/* ---- 右侧舞台 ---- */
+#stage{display:flex;flex-direction:column;gap:12px;min-height:0}
+#log{
+  flex:1;min-height:0;overflow-y:auto;padding:14px 18px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:16px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.y-head{display:flex;align-items:center;gap:10px;margin:10px 0 4px;color:var(--gold);letter-spacing:2px;font-size:13px}
+.y-head::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.y-head .age{font-family:"STKaiti","KaiTi",serif;font-size:16px;color:var(--gold2)}
+.li{font-size:13.5px;line-height:1.8;color:var(--ink);animation:fadeUp .35s ease}
+.li.act{color:#b9c6e8}
+.li.act b{color:var(--blue);font-weight:400}
+.li.ev b{color:var(--gold2);font-weight:400}
+.li.sys{color:var(--ink-dim);font-size:12.5px}
+.li.doom{color:var(--bad)}
+.li.good{color:var(--good)}
+.li.big{font-size:14.5px;color:var(--gold2);letter-spacing:1px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 4px}
+.chip{font-size:11.5px;padding:2px 8px;border-radius:99px;letter-spacing:1px;border:1px solid;animation:fadeUp .35s ease}
+.chip.up{color:var(--good);border-color:rgba(127,224,168,.35);background:rgba(127,224,168,.08)}
+.chip.dn{color:var(--bad);border-color:rgba(255,143,143,.35);background:rgba(255,143,143,.08)}
+
+/* ---- 事件卡 ---- */
+#event-card{
+  background:var(--panel);border:1px solid var(--gold);border-radius:16px;overflow:hidden;
+  box-shadow:0 12px 46px rgba(0,0,0,.6),0 0 24px rgba(216,180,90,.16);
+  animation:cardIn .4s cubic-bezier(.2,.9,.3,1.2);flex-shrink:0;
+}
+@keyframes cardIn{from{opacity:0;transform:scale(.94) translateY(14px)}to{opacity:1;transform:none}}
+.ev-img{position:relative;height:190px;overflow:hidden}
+.ev-img .scene{position:absolute;inset:0}
+.ev-img .scene svg{width:100%;height:100%;display:block}
+.ev-emoji{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:64px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.7));
+  animation:emojiFloat 3.2s ease-in-out infinite;
+}
+@keyframes emojiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ev-img.duo{display:flex;align-items:center;justify-content:center;gap:8px;background:radial-gradient(300px 200px at 50% 40%,rgba(220,110,150,.3),rgba(20,10,26,.85))}
+.ev-img.duo svg,.ev-img.duo .pframe{width:120px;height:160px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.6))}
+.duo-heart{font-size:34px;animation:emojiFloat 2s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(240,120,160,.8))}
+.ev-body{padding:12px 18px 14px}
+.ev-cat{font-size:11px;letter-spacing:4px;color:var(--gold);opacity:.85}
+.ev-title{font-family:"STKaiti","KaiTi",serif;font-size:22px;letter-spacing:4px;color:var(--gold2);margin:2px 0 6px}
+.ev-text{font-size:13.5px;line-height:1.85;color:var(--ink)}
+.ev-out{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(216,180,90,.3)}
+.ev-out .o-text{font-size:13.5px;line-height:1.8;color:var(--gold2)}
+.ev-choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.choice-btn{
+  font-family:inherit;cursor:pointer;text-align:left;color:var(--ink);
+  background:rgba(10,13,26,.6);border:1px solid rgba(216,180,90,.35);border-radius:10px;
+  padding:10px 14px;font-size:13.5px;letter-spacing:1px;transition:all .16s;line-height:1.5;
+}
+.choice-btn:hover{border-color:var(--gold);background:rgba(60,45,18,.5);transform:translateX(4px)}
+.choice-btn .sub{display:block;font-size:11.5px;color:var(--ink-dim);margin-top:2px;letter-spacing:0}
+.ev-continue{margin-top:10px;text-align:right}
+
+/* ---- 行为区 ---- */
+#actions{flex-shrink:0}
+.act-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:9px}
+.act-btn{
+  font-family:inherit;cursor:pointer;padding:11px 4px 9px;border-radius:12px;
+  background:linear-gradient(180deg,rgba(30,36,66,.7),rgba(14,17,34,.8));
+  border:1px solid rgba(216,180,90,.28);color:var(--ink);transition:all .16s;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.act-btn .ic{font-size:22px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.act-btn .nm{font-size:13.5px;letter-spacing:3px;font-family:"STKaiti","KaiTi",serif}
+.act-btn .tip{font-size:10px;color:var(--ink-dim);letter-spacing:0;line-height:1.4;text-align:center}
+.act-btn:hover:not(:disabled){border-color:var(--gold);box-shadow:0 0 16px rgba(216,180,90,.28);transform:translateY(-3px)}
+.act-btn:hover:not(:disabled) .nm{color:var(--gold2)}
+.act-btn:disabled{opacity:.35;cursor:not-allowed}
+.act-hint{margin-top:7px;text-align:center;font-size:12px;color:var(--ink-dim);letter-spacing:2px}
+
+/* ============ 横幅 ============ */
+#banner{
+  position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,5,12,.55);backdrop-filter:blur(3px);pointer-events:none;
+}
+#banner .bn{
+  font-family:"STKaiti","KaiTi",serif;text-align:center;animation:bnIn .7s cubic-bezier(.2,.9,.3,1.25);
+}
+#banner .bn .t{font-size:44px;letter-spacing:14px;color:var(--gold2);text-shadow:0 0 30px rgba(216,180,90,.85)}
+#banner .bn .s{margin-top:10px;font-size:16px;letter-spacing:5px;color:var(--ink)}
+#banner.death .bn .t{color:#c8ccd8;text-shadow:0 0 26px rgba(120,130,160,.7)}
+#banner.marriage .bn .t{color:var(--pink);text-shadow:0 0 26px rgba(239,143,176,.8)}
+#banner.ascend .bn .t{background:linear-gradient(90deg,#f6dd94,#9fe8ff,#f0a8ff,#f6dd94);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 24px rgba(246,221,148,.8))}
+@keyframes bnIn{from{opacity:0;transform:scale(1.5)}to{opacity:1;transform:scale(1)}}
+#banner.fade{animation:bnOut .8s ease forwards}
+@keyframes bnOut{to{opacity:0}}
+
+/* ============ 结局界面 ============ */
+#scr-end{align-items:center;justify-content:center;overflow:auto;padding:26px 14px}
+.end-wrap{max-width:820px;width:100%;text-align:center}
+.end-title-sm{font-size:13px;letter-spacing:8px;color:var(--ink-dim);margin-bottom:8px}
+.end-title{
+  font-family:"STKaiti","KaiTi",serif;font-size:46px;letter-spacing:12px;color:var(--gold2);
+  text-shadow:0 0 30px rgba(216,180,90,.6);margin-bottom:4px;
+}
+.end-score{font-size:14px;color:var(--ink-dim);letter-spacing:3px;margin-bottom:18px}
+.end-score b{color:var(--gold2);font-size:18px}
+.end-card{
+  display:grid;grid-template-columns:230px 1fr;gap:0;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 18px 60px rgba(0,0,0,.55);
+}
+.end-portrait{display:flex;align-items:center;justify-content:center;padding:16px;border-right:1px solid var(--line);background:radial-gradient(240px 300px at 50% 35%,rgba(150,120,60,.25),transparent 72%)}
+.end-portrait svg,.end-portrait .pframe{width:190px;height:253px}
+.halo{border-radius:14px;box-shadow:0 0 44px rgba(246,221,148,.55)}
+.halo.dark{box-shadow:0 0 34px rgba(90,100,130,.35)}
+.end-info{padding:18px 22px;display:flex;flex-direction:column;gap:10px}
+.poem{font-family:"STKaiti","KaiTi",serif;font-size:15.5px;line-height:2.1;color:var(--gold2);letter-spacing:2px;border-left:2px solid var(--line);padding-left:14px}
+.end-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.es-cell{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 6px;text-align:center}
+.es-cell .k{font-size:11px;color:var(--ink-dim);letter-spacing:2px}
+.es-cell .v{font-size:15px;margin-top:3px;font-variant-numeric:tabular-nums}
+.end-ms{font-size:12.5px;color:var(--ink-dim);line-height:1.9;max-height:120px;overflow:auto;border-top:1px dashed rgba(216,180,90,.3);padding-top:8px}
+.end-ms b{color:var(--gold);font-weight:400}
+.end-btns{margin-top:20px;display:flex;gap:14px;justify-content:center}
+
+@media (max-width:900px){
+  .start-card,.end-card{grid-template-columns:1fr}
+  .start-preview{border-right:none;border-bottom:1px solid var(--line)}
+  #scr-game main{grid-template-columns:1fr;overflow-y:auto}
+  #panel{max-height:none}
+  .act-grid{grid-template-columns:repeat(4,1fr)}
+  #log{min-height:200px;max-height:38vh}
+  body{overflow:auto}
+}
+
+/* ==========================================================
+   平板 / 触屏适配
+   ========================================================== */
+/* 动态视口高度：避开移动端浏览器地址栏造成的 100vh 抖动 */
+@supports (height:100dvh){ .screen{height:100dvh} }
+html,body{overscroll-behavior:none}
+
+/* 触屏：放大点击目标、去掉粘滞 hover、改用 active 反馈 */
+@media (pointer:coarse){
+  *{-webkit-tap-highlight-color:transparent}
+  button,select,input,.choice-btn,.seg .btn{
+    touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  }
+  /* 触屏上 :hover 会残留，统一还原，改由 :active 提供按压反馈 */
+  .btn:hover:not(:disabled),.act-btn:hover:not(:disabled),.choice-btn:hover{
+    transform:none;box-shadow:none;
+  }
+  .btn:active:not(:disabled){transform:scale(.97);border-color:var(--gold);color:var(--gold2)}
+  .act-btn:active:not(:disabled){transform:scale(.96);border-color:var(--gold);background:rgba(60,45,18,.42)}
+  .choice-btn:active{border-color:var(--gold);background:rgba(60,45,18,.6)}
+  .seg .btn:active{transform:scale(.97)}
+
+  /* 点击目标 ≥44px（手指友好） */
+  .btn{min-height:44px;padding:11px 20px;font-size:15px}
+  .btn.small{min-height:36px;padding:7px 13px;font-size:13px}
+  .btn.primary{min-height:52px;font-size:17px;padding:14px 28px}
+  .choice-btn{min-height:50px;padding:13px 16px;font-size:15px;border-radius:12px}
+  .choice-btn .sub{font-size:12.5px;margin-top:3px}
+  .act-btn{padding:14px 4px 12px;border-radius:14px}
+  .act-btn .ic{font-size:26px}
+  .act-btn .nm{font-size:15px}
+  .act-btn .tip{font-size:11px}
+  .ev-continue .btn{min-height:48px;font-size:16px;padding:12px 26px}
+  /* 16px 字号可避免部分浏览器聚焦输入框时自动放大页面 */
+  input[type=text],select{font-size:16px;min-height:46px;padding:10px 12px}
+  #music-vol{width:104px;height:8px}
+  #music-vol::-webkit-slider-thumb{width:22px;height:22px}
+  #music-vol::-moz-range-thumb{width:22px;height:22px}
+  .seg .btn{min-height:46px;padding:10px 24px;font-size:15px}
+  .build-btn{min-height:44px;padding:9px 15px;font-size:14px}
+  .stat-preview{font-size:14.5px}
+  /* 文字与滚动 */
+  .li{font-size:15px;line-height:1.9}
+  .li.big{font-size:16px}
+  .ev-text{font-size:15px;line-height:1.95}
+  .ev-title{font-size:25px}
+  #log,#panel,.end-ms{-webkit-overflow-scrolling:touch}
+.stat-row,.mini-grid{font-size:14px}
+.stat-row .lb{width:74px}
+  .bar{height:11px}
+}
+
+/* 窄屏：操作区吸底，滚动日志时也能随时点行为 */
+@media (max-width:900px){
+  #actions{
+    position:sticky;bottom:0;z-index:4;padding-bottom:6px;
+    background:linear-gradient(180deg,rgba(12,15,30,0),rgba(12,15,30,.94) 26%);
+  }
+}
+
+/* 手机：头部换行、按钮压缩、字号下调 */
+@media (max-width:720px){
+  #scr-game header{flex-wrap:wrap;gap:8px 10px;padding:8px 12px}
+  .hd-title{font-size:18px;letter-spacing:4px}
+  .hd-age{order:3;flex:1 1 100%;font-size:13px;letter-spacing:1px}
+  .btn.small{padding:6px 11px;font-size:12px;letter-spacing:1px;min-height:38px}
+  #music-vol{width:62px}
+}
+@media (max-width:480px){
+  .hd-title{font-size:16px;letter-spacing:2px}
+  .btn.small{padding:6px 9px;font-size:11.5px;letter-spacing:0;min-height:36px}
+  #music-vol{width:50px}
+  #scr-game main{padding:10px 10px 4px;gap:10px}
+  .act-grid{grid-template-columns:repeat(4,1fr);gap:6px}
+  .act-btn{padding:10px 2px 8px;border-radius:11px}
+  .act-btn .ic{font-size:21px}
+  .act-btn .nm{font-size:13px;letter-spacing:1px}
+  .act-btn .tip{font-size:9.5px;line-height:1.3}
+  .act-hint{font-size:11px;letter-spacing:1px}
+  #log{padding:10px 12px;min-height:140px;max-height:30vh}
+  .li{font-size:14px;line-height:1.85}
+  .ev-img{height:124px}
+  .ev-img.duo svg,.ev-img.duo .pframe{width:86px;height:115px}
+  .duo-heart{font-size:24px}
+  .ev-title{font-size:20px;letter-spacing:2px}
+  .ev-text{font-size:14px}
+  .ev-body{padding:10px 12px 12px}
+  .choice-btn{min-height:46px;padding:11px 13px;font-size:14px}
+  #panel{padding:12px 12px 10px}
+  #portrait-box{max-width:200px}
+  .ch-name b{font-size:19px;letter-spacing:3px}
+  .realm-badge{font-size:16px;letter-spacing:4px}
+  .game-title{font-size:34px;letter-spacing:8px}
+  .game-sub{font-size:12px;letter-spacing:3px;margin:8px 0 16px}
+  .start-form{padding:14px;gap:11px}
+  .f-label{min-width:40px;font-size:12px;letter-spacing:1px}
+  .f-row{gap:8px}
+  .start-preview{padding:12px 10px}
+  .start-preview svg,.start-preview .pframe{width:150px;height:200px}
+  .alloc-head{font-size:11.5px;line-height:1.6}
+  .desc-line{font-size:12px;min-height:auto}
+  .start-btns{gap:8px}
+  .start-btns .btn{flex:1 1 auto}
+  .howto{font-size:11.5px;line-height:1.85;margin-top:16px}
+  .end-title{font-size:28px;letter-spacing:5px}
+  .end-score{font-size:13px}
+  .end-portrait{padding:12px}
+  .end-portrait svg,.end-portrait .pframe{width:132px;height:176px}
+  .end-info{padding:14px}
+  .poem{font-size:14px;line-height:1.95}
+  .end-ms{max-height:96px;font-size:12px}
+  #banner .bn .t{font-size:30px;letter-spacing:8px}
+  #banner .bn .s{font-size:13px;letter-spacing:3px}
+}
+
+/* 平板横屏（常见 1024~1366）：面板略收窄，留更多舞台空间 */
+@media (min-width:901px) and (max-width:1366px) and (orientation:landscape){
+  #scr-game main{grid-template-columns:270px 1fr;gap:12px;padding:12px}
+  .act-grid{grid-template-columns:repeat(7,1fr);gap:8px}
+  .ev-img{height:170px}
+}
+
+/* 平板竖屏 / 窄屏：改为上下单列，事件卡与操作区保证可见 */
+@media (max-width:900px), (orientation:portrait) and (max-width:1100px){
+  #scr-game main{grid-template-columns:1fr;overflow-y:auto}
+  #panel{max-height:none;overflow:visible}
+  #portrait-box{max-width:260px;margin:0 auto;width:100%}
+  .act-grid{grid-template-columns:repeat(4,1fr)}
+  #log{min-height:170px;max-height:32vh}
+  .start-wrap{max-width:100%}
+  .game-title{font-size:44px;letter-spacing:12px}
+  .end-stats{grid-template-columns:repeat(2,1fr)}
+  .end-title{font-size:36px;letter-spacing:8px}
+  .ev-img.duo svg{width:104px;height:139px}
+}
+
+/* 刘海屏 / 手势条安全区 */
+#scr-game header{
+  padding-top:calc(10px + env(safe-area-inset-top));
+  padding-left:calc(20px + env(safe-area-inset-left));
+  padding-right:calc(20px + env(safe-area-inset-right));
+}
+#scr-game main{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+#scr-start,#scr-end{padding-left:calc(14px + env(safe-area-inset-left));padding-right:calc(14px + env(safe-area-inset-right))}
+
+/* ============ 女主 CG 场景 ============ */
+.ev-img.cg-mode{height:316px}
+.cg{position:absolute;inset:0;overflow:hidden;animation:cgIn .9s cubic-bezier(.2,.7,.3,1) both}
+@keyframes cgIn{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
+.cg-bg{position:absolute;inset:0}
+.cg-bg svg{width:100%;height:100%;display:block;animation:cgKen 26s ease-in-out infinite alternate}
+@keyframes cgKen{from{transform:scale(1)}to{transform:scale(1.07) translate(-8px,-4px)}}
+.cg-halo{
+  position:absolute;right:-4%;bottom:-14%;width:52%;height:124%;z-index:2;pointer-events:none;
+  background:radial-gradient(48% 44% at 50% 56%,var(--aura),transparent 72%);
+  opacity:.42;filter:blur(10px);mix-blend-mode:screen;
+}
+.cg-halo::after{
+  content:'';position:absolute;left:30%;top:34%;width:40%;height:34%;
+  background:radial-gradient(closest-side,rgba(255,255,255,.5),transparent 75%);filter:blur(6px);
+}
+.cg-shadow{
+  position:absolute;right:4%;bottom:-4px;width:38%;height:26px;z-index:2;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.5),transparent 70%);filter:blur(4px);
+}
+.cg-girl{
+  position:absolute;right:1.5%;bottom:0;width:44%;max-width:330px;height:103%;z-index:3;
+  filter:drop-shadow(0 10px 26px rgba(0,0,0,.55));
+  transition:transform .45s ease-out;will-change:transform;
+}
+.cg-body{width:100%;height:100%;animation:cgGirlIn 1.15s cubic-bezier(.2,.75,.3,1) both}
+@keyframes cgGirlIn{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+.cg-girl canvas,.cg-girl img{
+  width:100%;height:100%;object-fit:contain;object-position:50% 0;display:block;
+  animation:cgBreath 4.8s ease-in-out infinite alternate;transform-origin:50% 92%;
+}
+@keyframes cgBreath{from{transform:scale(1) rotate(0deg)}to{transform:scale(1.013) translateY(-3px) rotate(.45deg)}}
+.cg-sheen{
+  position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.5;
+  background:linear-gradient(112deg,transparent 42%,rgba(255,255,255,.075) 50%,transparent 58%);
+  background-size:280% 100%;animation:cgSheen 9s ease-in-out infinite;
+}
+@keyframes cgSheen{from{background-position:135% 0}to{background-position:-35% 0}}
+.cg-sub{
+  position:absolute;left:0;right:0;bottom:46px;z-index:5;text-align:center;pointer-events:none;
+  font-size:17px;letter-spacing:4px;color:#fff6e0;padding:0 60px;
+  text-shadow:0 0 10px rgba(0,0,0,.9),0 2px 5px rgba(0,0,0,.95);
+  opacity:0;animation:cgSubIn .9s 1.2s ease forwards;
+}
+.cg-sub::before{content:'「';opacity:.75}
+.cg-sub::after{content:'」';opacity:.75}
+@keyframes cgSubIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.cg-tint{
+  position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:linear-gradient(90deg,rgba(6,7,13,.52),rgba(6,7,13,0) 46%),linear-gradient(0deg,rgba(6,7,13,.62),rgba(6,7,13,0) 38%);
+}
+.cg-cap{position:absolute;left:16px;bottom:12px;z-index:6;display:flex;align-items:baseline;gap:10px;animation:fadeUp .8s .25s ease both}
+.cg-girl img.cg-masked{
+  -webkit-mask-image:radial-gradient(74% 74% at 50% 40%,#000 46%,transparent 74%);
+  mask-image:radial-gradient(74% 74% at 50% 40%,#000 46%,transparent 74%);
+}
+.cg-cap span{font-size:21px;letter-spacing:6px;color:var(--gold2);text-shadow:0 0 16px rgba(216,180,90,.65),0 2px 4px rgba(0,0,0,.85)}
+.cg-cap em{font-style:normal;font-size:12.5px;letter-spacing:2px;color:var(--ink);opacity:.85}
+.cg-cap i{
+  font-style:normal;font-size:10px;letter-spacing:3px;color:rgba(246,221,148,.9);
+  border:1px solid rgba(216,180,90,.55);border-radius:4px;padding:1px 6px;
+  background:rgba(10,12,24,.55);transform:translateY(-2px);
+}
+.cg .cg-full{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:7}
+.cg.has-full .cg-bg,.cg.has-full .cg-girl,.cg.has-full .cg-halo,.cg.has-full .cg-shadow,.cg.has-full .cg-tint,.cg.has-full .cg-sheen{display:none}
+/* CG 内部微动效 */
+.cg .cg-drift{animation:cgDrift 6.5s ease-in-out infinite alternate}
+.cg .cg-drift2{animation:cgDrift2 8s ease-in-out infinite alternate}
+.cg .cg-fall{animation:cgFall 10s linear infinite}
+.cg .cg-sway{transform-box:fill-box;transform-origin:50% 0;animation:cgSway 5s ease-in-out infinite alternate}
+.cg .cg-pulse{animation:cgPulse 5s ease-in-out infinite alternate}
+.cg .cg-flicker{animation:cgFlicker 2.6s ease-in-out infinite}
+.cg .cg-flicker2{animation:cgFlicker 2.2s .6s ease-in-out infinite}
+.cg .cg-rain{animation:cgRain 1.1s linear infinite}
+@keyframes cgDrift{from{transform:translateY(0)}to{transform:translateY(7px)}}
+@keyframes cgDrift2{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@keyframes cgFall{from{transform:translateY(-16px);opacity:0}12%{opacity:1}88%{opacity:1}to{transform:translateY(30px);opacity:0}}
+@keyframes cgSway{from{transform:rotate(-2.4deg)}to{transform:rotate(2.4deg)}}
+@keyframes cgPulse{from{opacity:.72}to{opacity:1}}
+@keyframes cgFlicker{0%,100%{opacity:1}38%{opacity:.78}56%{opacity:.92}74%{opacity:.82}}
+@keyframes cgRain{from{transform:translateY(-24px)}to{transform:translateY(0)}}
+/* CG 响应式 */
+@media (min-width:901px) and (max-width:1366px) and (orientation:landscape){.ev-img.cg-mode{height:266px}}
+@media (max-width:900px),(orientation:portrait) and (max-width:1100px){
+  .ev-img.cg-mode{height:230px}
+  .cg-girl{width:50%}
+  .cg-cap span{font-size:17px;letter-spacing:4px}
+  .cg-sub{font-size:14px;letter-spacing:2px;bottom:40px;padding:0 40px}
+}
+
+/* ============ 最后一轮优化（主流游戏标配） ============ */
+
+/* 自动存档轻提示 */
+#save-tip{
+  position:fixed;right:18px;bottom:18px;z-index:60;
+  padding:7px 16px;border-radius:999px;font-size:13px;letter-spacing:2px;
+  color:#d8b45a;background:rgba(18,16,31,.82);border:1px solid rgba(216,180,90,.35);
+  box-shadow:0 4px 18px rgba(0,0,0,.35);pointer-events:none;
+  opacity:0;transform:translateY(8px);transition:opacity .35s ease,transform .35s ease;
+}
+#save-tip.show{opacity:1;transform:translateY(0)}
+
+/* 突破 / 飞升全屏闪光 */
+.flash-gold,.flash-white{
+  position:fixed;inset:0;z-index:70;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%,rgba(255,222,120,.5),rgba(255,190,80,.14) 55%,transparent 78%);
+  animation:flashfade .85s ease-out forwards;
+}
+.flash-white{
+  background:radial-gradient(ellipse at 50% 40%,rgba(255,255,240,.75),rgba(255,236,180,.28) 55%,transparent 80%);
+  animation-duration:1.2s;
+}
+@keyframes flashfade{
+  0%{opacity:0}12%{opacity:1}100%{opacity:0}
+}
+
+/* 数字键快捷提示角标（行动按钮 / 抉择选项） */
+.act-btn .kbd,.choice-btn .kbd{
+  position:absolute;top:6px;right:8px;font-size:11px;line-height:1;
+  color:rgba(216,180,90,.7);border:1px solid rgba(216,180,90,.4);
+  border-radius:4px;padding:2px 5px;opacity:.85;
+}
+.choice-btn{position:relative}
